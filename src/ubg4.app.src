@@ -1,0 +1,20 @@
+{application, ubg4,
+ [{description, "An OTP application"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {ubg4_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    cowboy
+   ]},
+  {env, [
+         {ip_address, {127,0,0,1}},
+         {port, 8080},
+         {workers, 25}
+        ]},
+  {modules, []},
+
+  {licenses, ["MIT"]},
+  {links, []}
+ ]}.

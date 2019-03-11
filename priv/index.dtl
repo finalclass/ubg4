@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Uwspółcześniona Biblia Gdańska</title>
+    <style>
+     body {
+         font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+     }
+    </style>
+  </head>
+  <body>
+    <ul>
+      {% for book in books %}
+        <li>
+          <a href="/{{ book.short_name }}/1" title="{{ book.full_name }}">
+            {{ book.full_name }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+    
+  </body>
+</html>
