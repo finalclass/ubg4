@@ -8,12 +8,62 @@
          font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
      }
      .books {
-         width: 140px;
-         display: block;
-         float: left;
+         display: flex;
+         flex-direction: column;
+         flex-wrap: wrap;
+         height: 210px;
          margin: 0;
          padding: 0;
          list-style-type: none;
+         overflow: hidden;
+     }
+
+     .books li {
+         margin: 0 3px;
+         height: 35px;
+         font-size: 30px;
+         display: block;
+     }
+
+     @media (max-width: 700px) {
+         .books li {
+             font-size: 15px;
+         }
+     }
+     
+     .chapters {
+         display: none;
+         max-height: 350px;
+         list-style-type: none;
+         margin: 0;
+         padding: 0;
+     }
+     
+     .chapters li {
+         height: 35px;
+         font-size: 30px;
+         display: block;
+         float: left;
+         width: 70px;
+         border: solid 1px;
+         text-align: center;
+     }
+     
+     .books a, .chapters a {
+         text-decoration: none;
+     }
+     .chapters {
+         display: none;
+         overflow: hidden;
+     }
+
+     .chapters-menu {
+         display: none;
+         justify-content: space-between;
+     }
+
+     .chapters-menu .book-name {
+         font-weight: bold;
      }
     </style>
   </head>
@@ -21,12 +71,22 @@
     <ul class="books">
       {% for book in bible.books %}
         <li>
-          <a href="/{{ book.encoded_name }}/1" title="{{ book.full_name }}">
-            {{ book.full_name }}
+          <a href="/{{ book.encoded_name }}/1"
+             title="{{ book.full_name }}"
+             nof-chapters="{{ book.nof_chapters }}"
+             encoded-name="{{ book.encoded_name }}">
+            {{ book.short_name }}
           </a>
         </li>
       {% endfor %}
     </ul>
+
+    <div class="chapters-menu">
+      <a href="" class="back-button">&laquo; back</a>
+      <span class="book-name"></span>
+    </div>
+    
+    <ul class="chapters"></ul>
 
     <div class="content">
       <h3>{{ chapter.book_name }}, rozdział {{ chapter.number }}</h3>
@@ -37,6 +97,50 @@
         </p>
       {% endfor %}
     </div>
+
+    <script>
+     (function () {
+         var books = document.querySelector('.books');
+         var chaptersMenu = document.querySelector('.chapters-menu');
+         var chaptersContainer = document.querySelector('.chapters');
+
+         chaptersMenu.querySelector('.back-button').addEventListener('click', function (event) {
+             event.preventDefault();
+             chaptersMenu.style.display = 'none';
+             chaptersContainer.style.display = 'none';
+             books.style.display = 'flex';
+         });
+         
+         books.addEventListener('click', function (event) {
+             if (event.target.nodeName.toLowerCase() === 'a') {
+                 event.preventDefault();
+                 var linkNode = event.target;
+                 var bookName = linkNode.getAttribute('title') || '';
+                 var encodedName = linkNode.getAttribute('encoded-name') || '';
+                 var nofChapters = parseInt(linkNode.getAttribute('nof-chapters'), 10);
+
+                 chaptersMenu.querySelector('.book-name').innerText = bookName;
+                 
+                 while (chaptersContainer.hasChildNodes()) {
+                     chaptersContainer.removeChild(chaptersContainer.lastChild);
+                 }
+                 
+                 for (var i = 1; i < nofChapters + 1; i += 1) {
+                     var li = document.createElement('li');
+                     var a = document.createElement('a');
+                     a.setAttribute('href', '/' + encodedName + '/' + i);
+                     a.innerText = i;
+                     li.appendChild(a);
+                     chaptersContainer.appendChild(li);
+                 }
+
+                 chaptersContainer.style.display = 'block';
+                 chaptersMenu.style.display = 'flex';
+                 books.style.display = 'none';
+             }
+         }, true);
+     }());
+    </script>
     
   </body>
 </html>
