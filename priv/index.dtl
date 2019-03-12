@@ -24,12 +24,6 @@
          font-size: 30px;
          display: block;
      }
-
-     @media (max-width: 700px) {
-         .books li {
-             font-size: 15px;
-         }
-     }
      
      .chapters {
          display: none;
@@ -53,17 +47,26 @@
          text-decoration: none;
      }
      .chapters {
-         display: none;
          overflow: hidden;
      }
 
      .chapters-menu {
-         display: none;
          justify-content: space-between;
      }
 
      .chapters-menu .book-name {
          font-weight: bold;
+     }
+
+     @media (max-width: 700px) {
+         .books li {
+             font-size: 15px;
+         }
+         .chapters li {
+             font-size: 15px;
+             height: 20px;
+             width: 40px;
+         }
      }
     </style>
   </head>
@@ -83,7 +86,7 @@
 
     <div class="chapters-menu">
       <a href="" class="back-button">&laquo; back</a>
-      <span class="book-name"></span>
+      <span class="book-name">{{ chapter.book_name }}}}</span>
     </div>
     
     <ul class="chapters"></ul>
@@ -100,18 +103,59 @@
 
     <script>
      (function () {
-         var books = document.querySelector('.books');
+         var booksContainer = document.querySelector('.books');
          var chaptersMenu = document.querySelector('.chapters-menu');
          var chaptersContainer = document.querySelector('.chapters');
 
-         chaptersMenu.querySelector('.back-button').addEventListener('click', function (event) {
-             event.preventDefault();
+         function showBooksUI() {
              chaptersMenu.style.display = 'none';
              chaptersContainer.style.display = 'none';
-             books.style.display = 'flex';
-         });
+             booksContainer.style.display = 'flex';
+         }
+
+         function showChaptersUI() {
+             chaptersContainer.style.display = 'block';
+             chaptersMenu.style.display = 'flex';
+             booksContainer.style.display = 'none';
+         }
+
+         showBooksUI();
          
-         books.addEventListener('click', function (event) {
+         chaptersMenu.querySelector('.back-button').addEventListener('click', function (event) {
+             event.preventDefault();
+             showBooksUI();
+         });
+
+         window.addEventListener('popstate', function (event) {
+             var state = event.state;
+             
+             if (state && state.bookName) {
+                 showChapter(state.bookName, state.encodedName, state.nofChapters);
+             } else {
+                 showBooksUI();
+             }
+         });
+
+         function showChapter(bookName, encodedName, nofChapters) {
+             chaptersMenu.querySelector('.book-name').innerText = bookName;
+             
+             while (chaptersContainer.hasChildNodes()) {
+                 chaptersContainer.removeChild(chaptersContainer.lastChild);
+             }
+             
+             for (var i = 1; i < nofChapters + 1; i += 1) {
+                 var li = document.createElement('li');
+                 var a = document.createElement('a');
+                 a.setAttribute('href', '/' + encodedName + '/' + i);
+                 a.innerText = i;
+                 li.appendChild(a);
+                 chaptersContainer.appendChild(li);
+             }
+
+             showChaptersUI();
+         }
+         
+         booksContainer.addEventListener('click', function (event) {
              if (event.target.nodeName.toLowerCase() === 'a') {
                  event.preventDefault();
                  var linkNode = event.target;
@@ -119,24 +163,13 @@
                  var encodedName = linkNode.getAttribute('encoded-name') || '';
                  var nofChapters = parseInt(linkNode.getAttribute('nof-chapters'), 10);
 
-                 chaptersMenu.querySelector('.book-name').innerText = bookName;
-                 
-                 while (chaptersContainer.hasChildNodes()) {
-                     chaptersContainer.removeChild(chaptersContainer.lastChild);
-                 }
-                 
-                 for (var i = 1; i < nofChapters + 1; i += 1) {
-                     var li = document.createElement('li');
-                     var a = document.createElement('a');
-                     a.setAttribute('href', '/' + encodedName + '/' + i);
-                     a.innerText = i;
-                     li.appendChild(a);
-                     chaptersContainer.appendChild(li);
-                 }
+                 history.pushState({
+                     bookName: bookName,
+                     nofChapters: nofChapters,
+                     encodedName: encodedName
+                 }, '', '');
 
-                 chaptersContainer.style.display = 'block';
-                 chaptersMenu.style.display = 'flex';
-                 books.style.display = 'none';
+                 showChapter(bookName, encodedName, nofChapters);
              }
          }, true);
      }());
