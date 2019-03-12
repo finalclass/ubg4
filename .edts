@@ -1,0 +1,3 @@
+:name "ubg4"
+:lib-dirs '("_build/default/lib")
+:app-include-dirs '("src")

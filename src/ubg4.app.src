@@ -1,5 +1,5 @@
 {application, ubg4,
- [{description, "An OTP application"},
+ [{description, "Uwspółcześniona Biblia Gdańska"},
   {vsn, "0.1.0"},
   {registered, []},
   {mod, {ubg4_app, []}},

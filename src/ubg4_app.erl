@@ -19,7 +19,8 @@ start(_Type, _Args) ->
     ?L(TemplateCompilationResult),
     Dispatch = cowboy_router:compile([
                                       {'_', [
-                                             {"/", ubg4_handler, [{bible, Ubg4Data}]}
+                                             {"/", ubg4_handler, [{bible, Ubg4Data}]},
+                                             {"/:book/:chapter", ubg4_handler, [{bible, Ubg4Data}]}
                                             ]}
                                      ]),
     {ok, _} = cowboy:start_clear(http, [{port, 8080}], #{
