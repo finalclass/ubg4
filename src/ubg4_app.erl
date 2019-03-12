@@ -19,6 +19,8 @@ start(_Type, _Args) ->
     ?L(TemplateCompilationResult),
     Dispatch = cowboy_router:compile([
                                       {'_', [
+%% It's slow because here in Opts (Ubg4Data) we are copying the whole data structure
+%% while we should have ubg4_data be a gen_server with it's own data
                                              {"/", ubg4_handler, [{bible, Ubg4Data}]},
                                              {"/:book/:chapter", ubg4_handler, [{bible, Ubg4Data}]}
                                             ]}
