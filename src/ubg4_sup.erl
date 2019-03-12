@@ -19,5 +19,17 @@ start_link() ->
 %% supervisor.
 
 init([]) ->
-    Procs = [],
-    {ok, {{one_for_one, 10, 10}, Procs}}.
+    Restart = permanent,
+    Shutdown = infinity,
+    Type = worker,
+
+    TaskStrategy = {
+                    ubg4_data_id,
+                    {ubg4_data, start_link, []},
+                    Restart,
+                    Shutdown,
+                    Type,
+                    [ubg4_data]
+                   },
+
+    {ok, {{one_for_one, 10, 10}, [TaskStrategy]}}.

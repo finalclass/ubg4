@@ -14,6 +14,7 @@
 %% API.
 
 start(_Type, _Args) ->
+    ubg4_sup:start_link(),
     TemplateCompilationResult = erlydtl:compile_file(?PRIVDIR ++ "/index.dtl", ubg4_templates_index),
     Ubg4Data = ubg4_data:read_bible(?PRIVDIR ++ "/pubg-utf8.xml"),
     ?L(TemplateCompilationResult),
@@ -26,10 +27,7 @@ start(_Type, _Args) ->
                                             ]}
                                      ]),
 
-    {ok, _} = cowboy:start_clear(http, [{port, 8080}], #{
-                                                         env => #{dispatch => Dispatch}
-                                                        }),
-    ubg4_sup:start_link().
+    {ok, _} = cowboy:start_clear(http, [{port, 8080}], #{ env => #{dispatch => Dispatch} }).
 
 stop(_State) ->
     ok.

@@ -1,24 +1,91 @@
 -module(ubg4_data).
+-behaviour(gen_server).
 
--export([read_bible/1, read_bible/0]).
--export([test/0]).
--export([get_chapter/3]).
+-export([start_link/0]).
+-export([read_bible/1]).
+-export([get_books/0]).
+-export([get_chapter/2]).
+
+-export([code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1, terminate/2]).
 
 -define(L(Msg), io:format("~b: ~p~n", [?LINE, Msg])).
 
-read_bible() ->
-    read_bible("./priv/pubg-utf8.xml").
+%% ---------------------------
+%% API
+%% ---------------------------
+
+start_link() ->
+    gen_server:start_link({global, ?MODULE}, ?MODULE, [], []).
 
 read_bible(Path) ->
+    gen_server:call({global, ?MODULE}, {read_bible, Path}).
+
+get_books() ->
+    gen_server:call({global, ?MODULE}, {get_books}).
+    
+get_chapter(BookEncodedName, ChapterNumber) ->
+    gen_server:call({global, ?MODULE}, {get_chapter, BookEncodedName, ChapterNumber}).
+
+%% ---------------------------
+%% gen_server behaviour
+%% ---------------------------
+
+code_change(_OldVsn, State, _Extra) ->
+    {ok, State}.
+
+handle_call({read_bible, Path}, _From, State) ->
+    {reply, ok, maps:put(bible, read_bible_xml(Path), State)};
+
+handle_call({get_books}, _From, State) ->
+    #{bible := Bible} = State,
+    #{books := Books} = Bible,
+    BooksOnly = lists:map(fun(Book) -> #{
+                                         full_name => maps:get(full_name, Book),
+                                         short_name => maps:get(short_name, Book),
+                                         encoded_name => maps:get(encoded_name, Book),
+                                         nof_chapters => maps:get(nof_chapters, Book)
+                                        }
+                          end,
+                          Books),
+    {reply, BooksOnly, State};
+
+handle_call({get_chapter, BookEncodedName, ChapterNumberBin}, _From, State) ->
+    #{bible := Bible} = State,
+    [Book|_] = lists:filter(fun(B) -> maps:get(encoded_name, B) == BookEncodedName end, maps:get(books, Bible)),
+    ChapterNumber = list_to_integer(binary_to_list(ChapterNumberBin)),
+    Chapter = lists:nth(ChapterNumber, maps:get(chapters, Book)),
+    {reply, Chapter, State}.
+
+handle_cast(_Req, State) ->
+    {noreply, State}.
+
+handle_info(_Info, State) ->
+    {noreply, State}.
+
+init(_Args) ->
+    io:format("Starting ~p (~p)~n", [{global, ?MODULE}, self()]),
+    {ok, #{}}.
+
+terminate(normal, _State) ->
+    ok;
+
+terminate(Reason, _State) ->
+    io:format("terminate reason: ~p~n", [Reason]).
+
+%% --------------------
+%% Internal
+%% -------------------
+
+read_bible_xml(Path) ->
     Xml = erlang:element(1, xmerl_scan:file(Path)),
-    Books = get_books(Xml),
+    Books = get_books_from_xml(Xml),
     
     #{
       xml => Xml,
       books => Books
      }.
 
-get_books(BibleXml) ->
+get_books_from_xml(BibleXml) ->
     BNodes = xmerl_xpath:string("/bible/b", BibleXml),
     lists:map(
       fun(BookNode) ->
@@ -54,15 +121,7 @@ get_chapters(BookNode) ->
                 verses => Verses
                }
       end, 
-      ChapterNodes).
-
-get_chapter(BookEncodedName, ChapterNumberBin, Bible) ->
-    [Book|_] = lists:filter(fun(B) -> maps:get(encoded_name, B) == BookEncodedName end, maps:get(books, Bible)),
-    ChapterNumber = list_to_integer(binary_to_list(ChapterNumberBin)),
-    lists:nth(ChapterNumber, maps:get(chapters, Book)).
-
-test() ->
-    get_chapter(<<"lk">>, <<"1">>, read_bible()).
+      ChapterNodes).    
 
 %% PRIV
 
