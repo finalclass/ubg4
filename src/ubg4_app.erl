@@ -15,17 +15,19 @@
 
 start(_Type, _Args) ->
     ubg4_sup:start_link(),
-    TemplateCompilationResult = erlydtl:compile_file(?PRIVDIR ++ "/index.dtl", ubg4_templates_index),
-    Ubg4Data = ubg4_data:read_bible(?PRIVDIR ++ "/pubg-utf8.xml"),
+
+    TemplateCompilationResult = erlydtl:compile_dir(?PRIVDIR ++ "/templates", ubg4_templates),
     ?L(TemplateCompilationResult),
-    Dispatch = cowboy_router:compile([
-                                      {'_', [
-%% It's slow because here in Opts (Ubg4Data) we are copying the whole data structure
-%% while we should have ubg4_data be a gen_server with it's own data
-                                             {"/", ubg4_handler, [{bible, Ubg4Data}]},
-                                             {"/:book/:chapter", ubg4_handler, [{bible, Ubg4Data}]}
-                                            ]}
-                                     ]),
+
+    ubg4_data:read_bible(?PRIVDIR ++ "/pubg-utf8.xml"),
+
+    Routes = [
+              {"/", ubg4_handler, [{}]},
+              {"/:book/:chapter", ubg4_handler, [{}]},
+              {"/[...]", ubg4_not_found_handler, [{}]}
+             ],
+
+    Dispatch = cowboy_router:compile([{'_', Routes}]),
 
     {ok, _} = cowboy:start_clear(http, [{port, 8080}], #{ env => #{dispatch => Dispatch} }).
 

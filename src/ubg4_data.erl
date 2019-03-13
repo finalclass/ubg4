@@ -51,10 +51,24 @@ handle_call({get_books}, _From, State) ->
 
 handle_call({get_chapter, BookEncodedName, ChapterNumberBin}, _From, State) ->
     #{bible := Bible} = State,
-    [Book|_] = lists:filter(fun(B) -> maps:get(encoded_name, B) == BookEncodedName end, maps:get(books, Bible)),
-    ChapterNumber = list_to_integer(binary_to_list(ChapterNumberBin)),
-    Chapter = lists:nth(ChapterNumber, maps:get(chapters, Book)),
-    {reply, Chapter, State}.
+    FindBookResult = lists:filter(fun(B) -> maps:get(encoded_name, B) == BookEncodedName end, maps:get(books, Bible)),
+    case FindBookResult of
+        [] -> 
+            {reply, {error, book_not_found}, State};
+        [Book|_] -> 
+            try list_to_integer(binary_to_list(ChapterNumberBin)) of
+                ChapterNumber ->
+                    Chapters = maps:get(chapters, Book),
+                    case ChapterNumber > length(Chapters) orelse ChapterNumber < 1 of
+                        true -> {reply, {error, chapter_not_found}, State};
+                        false ->
+                            Chapter = lists:nth(ChapterNumber, Chapters),
+                            {reply, Chapter, State}
+                    end 
+            catch
+                _:_ -> {reply, {error, invalid_chapter_number}, State}
+            end
+    end.
 
 handle_cast(_Req, State) ->
     {noreply, State}.

@@ -8,7 +8,7 @@ build_module(Mod) ->
     code:load_file(Mod).
 
 build() ->
-    erlydtl:compile_file("./priv/index.dtl", ubg4_templates_index),
+    erlydtl:compile_dir("./priv/templates", ubg4_templates),
     build_module(ubg4_app),
     build_module(ubg4_data),
     build_module(ubg4_handler),

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Document</title>
+    <style>
+     body {
+         text-align: center;
+         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
+     }
+    </style>
+  </head>
+  <body>
+    <h1>404 Not Found</h1>
+    <p>Strona o podanym adresie nie istnieje</p>
+    <a href="/">Przejdź do strony głównej</a>
+  </body>
+</html>
