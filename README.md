@@ -21,5 +21,5 @@ Start the release
 ----------------
 
 ```bash
-docker run -p "8080:8080" -d finalclass/ubg4
+docker run -p "8080:8080" -d --restart=always finalclass/ubg4
 ```
