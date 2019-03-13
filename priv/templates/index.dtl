@@ -24,14 +24,14 @@
          font-size: 30px;
          display: block;
      }
-     
+
      .chapters {
          display: none;
          list-style-type: none;
          margin: 0;
          padding: 0;
      }
-     
+
      .chapters li {
          height: 35px;
          font-size: 30px;
@@ -41,7 +41,7 @@
          border: solid 1px;
          text-align: center;
      }
-     
+
      .books a, .chapters a {
          text-decoration: none;
      }
@@ -61,7 +61,7 @@
          padding: 2px;
          margin: 3px 0;
      }
-     
+
      .content p.active {
          background-color: #fffc8566;
          border-radius: 5px;
@@ -101,12 +101,12 @@
       <a href="" class="back-button">&laquo; back</a>
       <span class="book-name">{{ chapter.book_name }}}}</span>
     </div>
-    
+
     <ul class="chapters"></ul>
 
     <div class="content">
       <h3>{{ chapter.book_name }}, rozdział {{ chapter.number }}</h3>
-      
+
       {% for verse in chapter.verses %}
         <p verse-number="{{ verse.number }}">
           {{ verse.number }} {{ verse.text }}
@@ -139,7 +139,7 @@
              });
              verseNode.className = 'active';
          }
-         
+
          showBooksUI();
 
          if (location.hash) {
@@ -149,15 +149,15 @@
                  selectVerse(foundVerse);
              }
          }
-         
+
          chaptersMenu.querySelector('.back-button').addEventListener('click', function (event) {
              event.preventDefault();
              history.back();
          });
-         
+
          window.addEventListener('popstate', function (event) {
              var state = event.state;
-             
+
              if (state && state.bookName) {
                  showChapter(state.bookName, state.encodedName, state.nofChapters);
              } else {
@@ -167,11 +167,11 @@
 
          function showChapter(bookName, encodedName, nofChapters) {
              chaptersMenu.querySelector('.book-name').innerText = bookName;
-             
+
              while (chaptersContainer.hasChildNodes()) {
                  chaptersContainer.removeChild(chaptersContainer.lastChild);
              }
-             
+
              for (var i = 1; i < nofChapters + 1; i += 1) {
                  var li = document.createElement('li');
                  var a = document.createElement('a');
@@ -183,7 +183,7 @@
 
              showChaptersUI();
          }
-         
+
          booksContainer.addEventListener('click', function (event) {
              if (event.target.nodeName.toLowerCase() === 'a') {
                  event.preventDefault();
@@ -211,6 +211,6 @@
          }, true);
      }());
     </script>
-    
+
   </body>
 </html>
