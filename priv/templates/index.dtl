@@ -57,9 +57,23 @@
          font-weight: bold;
      }
 
+     .content p {
+         padding: 2px;
+         margin: 3px 0;
+     }
+     
+     .content p.active {
+         background-color: #fffc8566;
+         border-radius: 5px;
+     }
+
      @media (max-width: 700px) {
+         .books {
+             height: 120px;
+         }
          .books li {
              font-size: 15px;
+             height: 20px;
          }
          .chapters li {
              font-size: 15px;
@@ -94,7 +108,7 @@
       <h3>{{ chapter.book_name }}, rozdział {{ chapter.number }}</h3>
       
       {% for verse in chapter.verses %}
-        <p>
+        <p verse-number="{{ verse.number }}">
           {{ verse.number }} {{ verse.text }}
         </p>
       {% endfor %}
@@ -105,6 +119,7 @@
          var booksContainer = document.querySelector('.books');
          var chaptersMenu = document.querySelector('.chapters-menu');
          var chaptersContainer = document.querySelector('.chapters');
+         var versesContainer = document.querySelector('.content');
 
          function showBooksUI() {
              chaptersMenu.style.display = 'none';
@@ -118,13 +133,28 @@
              booksContainer.style.display = 'none';
          }
 
+         function selectVerse(verseNode) {
+             versesContainer.querySelectorAll('p').forEach(function (p) {
+                 p.className = '';
+             });
+             verseNode.className = 'active';
+         }
+         
          showBooksUI();
+
+         if (location.hash) {
+             var foundVerse = versesContainer.querySelector('[verse-number="' + location.hash.substr(1) + '"]');
+             if (foundVerse) {
+                 window.scrollTo(0, foundVerse.offsetTop);
+                 selectVerse(foundVerse);
+             }
+         }
          
          chaptersMenu.querySelector('.back-button').addEventListener('click', function (event) {
              event.preventDefault();
              history.back();
          });
-
+         
          window.addEventListener('popstate', function (event) {
              var state = event.state;
              
@@ -169,6 +199,14 @@
                  }, '', '');
 
                  showChapter(bookName, encodedName, nofChapters);
+             }
+         }, true);
+
+         versesContainer.addEventListener('click', function (event) {
+             if (event.target.nodeName.toLowerCase() === 'p') {
+                 event.preventDefault();
+                 location.hash = event.target.getAttribute('verse-number');
+                 selectVerse(event.target);
              }
          }, true);
      }());
