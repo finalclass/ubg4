@@ -7,7 +7,7 @@
 init(Req, State) ->
     ResponseBody = ubg4_templates:not_found([]),
 
-    ReqWithReply = cowboy_req:reply(200, #{<<"content-type">> => <<"text/html">>},
+    ReqWithReply = cowboy_req:reply(404, #{<<"content-type">> => <<"text/html">>},
                            ResponseBody, Req),
 
     {ok, ReqWithReply, State}.
