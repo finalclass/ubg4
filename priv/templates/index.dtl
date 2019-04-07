@@ -67,6 +67,18 @@
          border-radius: 5px;
      }
 
+     .flash-message {
+         display: none;
+         margin: 0;
+         position: fixed;
+         top: 0;
+         left: 0;
+         width: 100%;
+         text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+         text-align: center;
+         background-color: rgba(255, 255, 255, 0.8);
+     }
+
      @media (max-width: 700px) {
          .books {
              height: 120px;
@@ -109,11 +121,13 @@
 
       {% for verse in chapter.verses %}
         <p verse-number="{{ verse.number }}">
-          {{ verse.number }} {{ verse.text }}
+          {{ verse.number }}{{ verse.text }}
         </p>
       {% endfor %}
     </div>
 
+    <div class="flash-message"></div>
+    
     <script>
      (function () {
          var booksContainer = document.querySelector('.books');
@@ -140,6 +154,18 @@
              verseNode.className = 'active';
          }
 
+         var flashMessageContainer = document.querySelector('.flash-message');
+         var hideFlashMessageTimeout;
+         function showFlashMessage(msg) {
+             clearTimeout(hideFlashMessageTimeout);
+             flashMessageContainer.textContent = msg;
+             flashMessageContainer.style.display = 'block';
+             hideFlashMessageTimeout = setTimeout(function () {
+                 flashMessageContainer.textContent = '';
+                 flashMessageContainer.style.display = 'none';
+             }, 3000);
+         }
+         
          showBooksUI();
 
          if (location.hash) {
@@ -204,6 +230,13 @@
 
          versesContainer.addEventListener('click', function (event) {
              if (event.target.nodeName.toLowerCase() === 'p') {
+                 if (Date.now() - (event.target.__lastClick || 0) < 500) {
+                     return navigator.clipboard.writeText(event.target.textContent.trim()).then(function () {
+                         showFlashMessage('Skopiowano');
+                     });
+                 }
+                 
+                 event.target.__lastClick = Date.now();
                  event.preventDefault();
                  location.hash = event.target.getAttribute('verse-number');
                  selectVerse(event.target);
