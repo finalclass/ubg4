@@ -231,9 +231,8 @@
          versesContainer.addEventListener('click', function (event) {
              if (event.target.nodeName.toLowerCase() === 'p') {
                  if (Date.now() - (event.target.__lastClick || 0) < 500) {
-                     return navigator.clipboard.writeText(event.target.textContent.trim()).then(function () {
-                         showFlashMessage('Skopiowano');
-                     });
+                     copyToClipboard(event.target.textContent.trim());
+                     return showFlashMessage('Skopiowano');
                  }
                  
                  event.target.__lastClick = Date.now();
@@ -242,6 +241,18 @@
                  selectVerse(event.target);
              }
          }, true);
+
+         function copyToClipboard(text) {
+             var textArea = document.createElement('textarea');
+             textArea.value = text;
+             // without this the page scrolls down when we copy:
+             textArea.style.position = 'fixed';
+             document.body.appendChild(textArea);
+             textArea.focus();
+             textArea.select();
+             document.execCommand('copy')
+             document.body.removeChild(textArea);
+         }
      }());
     </script>
 
