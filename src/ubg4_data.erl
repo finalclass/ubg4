@@ -2,13 +2,14 @@
 -behaviour(gen_server).
 
 -export([start_link/0]).
--export([read_bible/1]).
+-export([read_bible/1, read_bible/0]).
 -export([get_books/0]).
 -export([get_chapter/2]).
 
 -export([code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1, terminate/2]).
 
 -define(L(Msg), io:format("~b: ~p~n", [?LINE, Msg])).
+-define(PRIVDIR, code:priv_dir(ubg4)).
 
 %% ---------------------------
 %% API
@@ -19,6 +20,9 @@ start_link() ->
 
 read_bible(Path) ->
     gen_server:call({global, ?MODULE}, {read_bible, Path}).
+
+read_bible() ->
+    read_bible(?PRIVDIR ++ "/pubg-utf8.xml").
 
 get_books() ->
     gen_server:call({global, ?MODULE}, {get_books}).
@@ -104,7 +108,7 @@ get_books_from_xml(BibleXml) ->
     lists:map(
       fun(BookNode) ->
               Chapters = get_chapters(BookNode),
-
+              
               #{
                 full_name => get_bin_attribute("n", BookNode),
                 short_name => get_bin_attribute("s", BookNode),
@@ -130,6 +134,7 @@ get_chapters(BookNode) ->
                          VNodes),
 
               #{
+                book_nt_index => get_bin_attribute("nti", BookNode),
                 book_name => get_bin_attribute("n", BookNode),
                 number => get_bin_attribute("n", ChapterNode),
                 verses => Verses
