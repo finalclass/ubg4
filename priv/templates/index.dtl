@@ -171,17 +171,16 @@
 
          function selectVerse(verseNode) {
              versesContainer.querySelectorAll('.verse').forEach(function (verse) {
-                 verse.className = verse.className.replace(/active/g, '');
+                 verse.classList.remove('active');
                  var a = verse.querySelector('.interlinear-link');
                  if (a) {
                      verse.removeChild(a);
                  }
              });
 
-             verseNode.className += ' active';
+             verseNode.classList.add('active');
              
              var bookNumber = versesContainer.dataset.ntIndex;
-             console.log('bookNumber', bookNumber);
              if (!bookNumber) {
                  // don't add interlinear link if on old testament (not available yet)
                  return;
@@ -279,9 +278,11 @@
          }, true);
 
          versesContainer.addEventListener('click', function (event) {
-             if (event.target.className.indexOf('verse') !== -1) {
-                 var container = event.target.className.indexOf('verse-text') === -1 ?
-                     event.target : event.target.parentNode;
+             var hasVerseClass = event.target.classList.contains('verse');
+             var hasVerseTextClass = event.target.classList.contains('verse-text');
+             
+             if (hasVerseClass || hasVerseTextClass) {
+                 var container = hasVerseTextClass ? event.target.parentNode : event.target;
                  
                  if (Date.now() - (container.__lastClick || 0) < 500) {
                      var verseText = container.querySelector('.verse-text').textContent.trim();
