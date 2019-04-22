@@ -77,6 +77,13 @@
         selectVerseByNumber(location.hash.substr(1));
     }
 
+    if (location.search === '?chapters') {
+        const { encodedName, chapterNumber } = readLocation();
+        const link = booksContainer.querySelector('a[data-encoded-name="' + encodedName + '"]');
+        console.log('link', { link, encodedName, chapterNumber });
+        showChapter(link.getAttribute('title'), encodedName, parseInt(link.dataset.nofChapters, 10));
+    }
+
     chaptersMenu.querySelector('.back-button').addEventListener('click', function (event) {
         event.preventDefault();
         history.back();
@@ -92,9 +99,7 @@
             showChapter(state.bookName, state.encodedName, state.nofChapters);
         } else {
             showBooksUI();
-            let [nothing, encodedName, chapterNumber] = location.pathname.split('/');
-            encodedName = encodedName || 'rdz';
-            chapterNumber = chapterNumber || 1;
+            const {encodedName, chapterNumber} = readLocation();
             loadChapter(encodedName, chapterNumber);
             if (location.hash) {
                 selectVerseByNumber(location.hash.substr(1), false);
@@ -139,14 +144,14 @@
             event.preventDefault();
             var linkNode = event.target;
             var bookName = linkNode.getAttribute('title') || '';
-            var encodedName = linkNode.getAttribute('encoded-name') || '';
-            var nofChapters = parseInt(linkNode.getAttribute('nof-chapters'), 10);
+            var encodedName = linkNode.dataset.encodedName || '';
+            var nofChapters = parseInt(linkNode.dataset.nofChapters, 10);
 
             history.pushState({
                 bookName: bookName,
                 nofChapters: nofChapters,
                 encodedName: encodedName
-            }, '', '/' + encodedName + '/1');
+            }, '', '/' + encodedName + '/1?chapters');
 
             showChapter(bookName, encodedName, nofChapters);
         }
@@ -197,5 +202,13 @@
             }
             selectVerse(foundVerse);
         }
+    }
+
+    function readLocation() {
+        let [nothing, encodedName, chapterNumber] = location.pathname.split('/');
+        encodedName = encodedName || 'rdz';
+        chapterNumber = chapterNumber || 1;
+
+        return {encodedName, chapterNumber};
     }
 }());

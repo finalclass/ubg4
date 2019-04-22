@@ -13,8 +13,8 @@
         <li>
           <a href="/{{ book.encoded_name }}/1"
              title="{{ book.full_name }}"
-             nof-chapters="{{ book.nof_chapters }}"
-             encoded-name="{{ book.encoded_name }}">
+             data-nof-chapters="{{ book.nof_chapters }}"
+             data-encoded-name="{{ book.encoded_name }}">
             {{ book.short_name }}
           </a>
         </li>
