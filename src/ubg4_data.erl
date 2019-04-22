@@ -136,6 +136,7 @@ get_chapters(BookNode) ->
               #{
                 book_nt_index => get_bin_attribute("nti", BookNode),
                 book_name => get_bin_attribute("n", BookNode),
+                encoded_book_name => get_bin_attribute("u", BookNode),
                 number => get_bin_attribute("n", ChapterNode),
                 verses => Verses
                }

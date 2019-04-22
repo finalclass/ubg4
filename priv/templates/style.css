@@ -1,0 +1,106 @@
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.books {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    height: 210px;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    overflow: hidden;
+}
+
+.books li {
+    margin: 0 3px;
+    height: 35px;
+    font-size: 30px;
+    display: block;
+}
+
+.chapters {
+    display: none;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.chapters li {
+    height: 35px;
+    font-size: 30px;
+    display: block;
+    float: left;
+    width: 70px;
+    border: solid 1px;
+    text-align: center;
+}
+
+.books a, .chapters a {
+    text-decoration: none;
+}
+.chapters {
+    overflow: hidden;
+}
+
+.chapters-menu {
+    justify-content: space-between;
+}
+
+.chapters-menu .book-name {
+    font-weight: bold;
+}
+
+.content .verse {
+    padding: 2px;
+    margin: 3px 0;
+}
+
+.content .verse-text {
+    display: inline
+}
+
+.content .verse .interlinear-link {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    user-select: none;
+    text-decoration: none;
+    color: #ddddff;
+    font-weight: bold;
+}
+
+.content .verse.active {
+    background-color: #fffc8566;
+    border-radius: 5px;
+}
+
+.flash-message {
+    margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.flash-message span {
+    display: none;
+    background-color: #FFFECE;
+    padding: 3px 10px;
+}
+
+@media (max-width: 700px) {
+    .books {
+        height: 120px;
+    }
+    .books li {
+        font-size: 15px;
+        height: 20px;
+    }
+    .chapters li {
+        font-size: 15px;
+        height: 20px;
+        width: 40px;
+    }
+}
