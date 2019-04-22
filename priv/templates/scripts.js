@@ -73,41 +73,36 @@
 
     showBooksUI();
 
-    if (location.hash) {
-        selectVerseByNumber(location.hash.substr(1));
-    }
-
-    if (location.search === '?chapters') {
-        const { encodedName, chapterNumber } = readLocation();
-        const link = booksContainer.querySelector('a[data-encoded-name="' + encodedName + '"]');
-        console.log('link', { link, encodedName, chapterNumber });
-        showChapter(link.getAttribute('title'), encodedName, parseInt(link.dataset.nofChapters, 10));
-    }
-
     chaptersMenu.querySelector('.back-button').addEventListener('click', function (event) {
         event.preventDefault();
         history.back();
     });
 
-    window.addEventListener('popstate', function (event) {
-        var state = event.state;
-        if (state && state.selectedVerse) {
-            showBooksUI();
-            loadChapter(state.encodedName, state.chapterNumber)
-                .then(() => selectVerseByNumber(state.selectedVerse, false)); 
-        } else if (state && state.bookName) {
-            showChapter(state.bookName, state.encodedName, state.nofChapters);
+    function initFromLocation() {
+        var loc = readLocation();
+
+        if (loc.chapters) {
+            showChaptersMenu(loc.encodedName);
         } else {
             showBooksUI();
-            const {encodedName, chapterNumber} = readLocation();
-            loadChapter(encodedName, chapterNumber);
-            if (location.hash) {
-                selectVerseByNumber(location.hash.substr(1), false);
-            }
         }
-    });
+        
+        loadChapter(loc.encodedName, loc.chapterNumber, function () {
+            if (loc.verse) {
+                selectVerseByNumber(loc.verse, false);
+            }
+        });
+    }
+    
+    window.addEventListener('popstate', initFromLocation);
 
-    function showChapter(bookName, encodedName, nofChapters) {
+    initFromLocation();
+
+    function showChaptersMenu(encodedName) {
+        var link = booksContainer.querySelector('a[data-encoded-name="' + encodedName + '"]');
+        var bookName = link.getAttribute('title') || '';
+        var nofChapters = parseInt(link.dataset.nofChapters, 10);
+        
         chaptersMenu.querySelector('.book-name').innerText = bookName;
 
         while (chaptersContainer.hasChildNodes()) {
@@ -124,19 +119,28 @@
         }
 
         showChaptersUI();
-        loadChapter(encodedName, 1);
     }
 
-    function loadChapter(bookEncodedName = 'rdz', chapterNumber = 1) {
-        if (chapter.dataset.bookEncodedName === bookEncodedName && chapter.dataset.chapterNumber === chapterNumber) {
-            return Promise.resolve();
+    function loadChapter(bookEncodedName, chapterNumber, callback) {
+        var currentEncodedBookName = chapter.dataset.encodedBookName;
+        var currentChapterNumber = parseInt(chapter.dataset.chapterNumber, 10);
+        if (currentEncodedBookName === bookEncodedName && currentChapterNumber === chapterNumber) {
+            if (callback) {
+                callback();
+            }
+            return;
         }
-        return fetch('/' + bookEncodedName + '/' + chapterNumber + '?noLayout=true')
-            .then(data => data.text())
-            .then(chapter => {
-                document.querySelector('.chapter-container').innerHTML = chapter;
-                chapter = document.querySelector('.chapter');
-            });
+        var req = new XMLHttpRequest();
+        req.addEventListener('load', function () {
+            var chapter = req.responseText;
+            document.querySelector('.chapter-container').innerHTML = chapter;
+            chapter = document.querySelector('.chapter');
+            if (callback) {
+                callback();
+            }
+        });
+        req.open('GET', '/' + bookEncodedName + '/' + chapterNumber + '?noLayout=true');
+        req.send();
     }
 
     booksContainer.addEventListener('click', function (event) {
@@ -147,13 +151,10 @@
             var encodedName = linkNode.dataset.encodedName || '';
             var nofChapters = parseInt(linkNode.dataset.nofChapters, 10);
 
-            history.pushState({
-                bookName: bookName,
-                nofChapters: nofChapters,
-                encodedName: encodedName
-            }, '', '/' + encodedName + '/1?chapters');
+            history.pushState({}, '', '/' + encodedName + '/1?chapters');
 
-            showChapter(bookName, encodedName, nofChapters);
+            showChaptersMenu(encodedName);
+            loadChapter(encodedName, 1);
         }
     }, true);
 
@@ -172,12 +173,8 @@
 
             container.__lastClick = Date.now();
             event.preventDefault();
-            history.pushState({
-                bookName: chapter.dataset.bookName,
-                encodedName: chapter.dataset.encodedBookName,
-                chapterNumber: chapter.dataset.chapterNumber,
-                selectedVerse: container.dataset.verseNumber
-            }, '', '/' + chapter.dataset.encodedBookName + '/' + chapter.dataset.chapterNumber + '#' + container.dataset.verseNumber);
+            var link = location.pathname + location.search + '#' + container.dataset.verseNumber;
+            history.pushState({}, '', link);
             selectVerse(container);
         }
     }, true);
@@ -205,10 +202,15 @@
     }
 
     function readLocation() {
-        let [nothing, encodedName, chapterNumber] = location.pathname.split('/');
-        encodedName = encodedName || 'rdz';
-        chapterNumber = chapterNumber || 1;
+        var split = location.pathname.split('/');
+        var encodedName = split[1];
+        var chapterNumber = split[2];
 
-        return {encodedName, chapterNumber};
+        return {
+            encodedName: encodedName || 'rdz',
+            chapterNumber: parseInt(chapterNumber, 10) || 1,
+            chapters: location.search === '?chapters',
+            verse: parseInt((location.hash || '').substr(1), 10)
+        };
     }
 }());
