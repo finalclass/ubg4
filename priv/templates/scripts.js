@@ -17,13 +17,7 @@
     }
 
     function selectVerse(verseNode) {
-        chapterContainer.querySelectorAll('.verse').forEach(function (verse) {
-            verse.classList.remove('active');
-            var a = verse.querySelector('.interlinear-link');
-            if (a) {
-                verse.removeChild(a);
-            }
-        });
+        deselectVerse();
 
         verseNode.classList.add('active');
 
@@ -90,6 +84,8 @@
         loadChapter(loc.encodedName, loc.chapterNumber, function () {
             if (loc.verse) {
                 selectVerseByNumber(loc.verse, false);
+            } else {
+                deselectVerse();
             }
         });
     }
@@ -195,6 +191,16 @@
         document.body.removeChild(textArea);
     }
 
+    function deselectVerse() {
+        chapterContainer.querySelectorAll('.verse').forEach(function (verse) {
+            verse.classList.remove('active');
+            var a = verse.querySelector('.interlinear-link');
+            if (a) {
+                verse.removeChild(a);
+            }
+        });
+    }
+    
     function selectVerseByNumber(verseNumber, scroll = true) {
         var foundVerse = chapterContainer.querySelector('[data-verse-number="' + verseNumber + '"]');
         if (foundVerse) {
