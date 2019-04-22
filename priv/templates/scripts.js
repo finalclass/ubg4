@@ -2,7 +2,8 @@
     var booksContainer = document.querySelector('.books');
     var chaptersMenu = document.querySelector('.chapters-menu');
     var chaptersContainer = document.querySelector('.chapters');
-    var versesContainer = document.querySelector('.content');
+    var chapter = document.querySelector('.chapter');
+    var chapterContainer = document.querySelector('.chapter-container');
 
     function showBooksUI() {
         chaptersMenu.style.display = 'none';
@@ -17,7 +18,7 @@
     }
 
     function selectVerse(verseNode) {
-        versesContainer.querySelectorAll('.verse').forEach(function (verse) {
+        chapterContainer.querySelectorAll('.verse').forEach(function (verse) {
             verse.classList.remove('active');
             var a = verse.querySelector('.interlinear-link');
             if (a) {
@@ -27,26 +28,34 @@
 
         verseNode.classList.add('active');
         
-        var bookNumber = versesContainer.dataset.ntIndex;
-        if (!bookNumber) {
-            // don't add interlinear link if on old testament (not available yet)
-            return;
-        }
         var interlinearLink = document.createElement('a');
         interlinearLink.setAttribute('target', '_blank');
         interlinearLink.className = 'interlinear-link';
         interlinearLink.setAttribute('title', 'Otwórz w Biblii Interlinearnej');
         
-        var chapterNumber = versesContainer.dataset.chapterNumber;
+        var chapterNumber = chapter.dataset.chapterNumber;
         var verseNumber = verseNode.dataset.verseNumber;
-        
-        interlinearLink.setAttribute(
-            'href',
-            'http://biblia.oblubienica.eu/interlinearny/index'
-                + '/book/' + bookNumber
-                + '/chapter/' + chapterNumber
-                + '/verse/' + verseNumber
-        );
+
+        var ntBookIndex = chapter.dataset.ntIndex;
+        var otBookName = chapter.dataset.otName;
+        if (ntBookIndex) {
+            interlinearLink.setAttribute(
+                'href',
+                'http://biblia.oblubienica.eu/interlinearny/index'
+                    + '/book/' + ntBookIndex
+                    + '/chapter/' + chapterNumber
+                    + '/verse/' + verseNumber
+            );
+        } else if (otBookName) {
+            interlinearLink.setAttribute(
+                'href',
+                'https://biblehub.com/'
+                    + otBookName
+                    + '/' + chapterNumber + '-' + verseNumber + '.htm'
+                    + '#combox'
+            );
+        }
+
         verseNode.appendChild(interlinearLink);
     }
 
@@ -65,11 +74,7 @@
     showBooksUI();
 
     if (location.hash) {
-        var foundVerse = versesContainer.querySelector('[data-verse-number="' + location.hash.substr(1) + '"]');
-        if (foundVerse) {
-            window.scrollTo(0, foundVerse.offsetTop);
-            selectVerse(foundVerse);
-        }
+        selectVerseByNumber(location.hash.substr(1));
     }
 
     chaptersMenu.querySelector('.back-button').addEventListener('click', function (event) {
@@ -79,13 +84,21 @@
 
     window.addEventListener('popstate', function (event) {
         var state = event.state;
-
-        if (state && state.bookName) {
+        if (state && state.selectedVerse) {
+            showBooksUI();
+            loadChapter(state.encodedName, state.chapterNumber)
+                .then(() => selectVerseByNumber(state.selectedVerse, false)); 
+        } else if (state && state.bookName) {
             showChapter(state.bookName, state.encodedName, state.nofChapters);
         } else {
             showBooksUI();
-            const [nothing, encodedName, chapterNumber] = location.pathname.split('/');
+            let [nothing, encodedName, chapterNumber] = location.pathname.split('/');
+            encodedName = encodedName || 'rdz';
+            chapterNumber = chapterNumber || 1;
             loadChapter(encodedName, chapterNumber);
+            if (location.hash) {
+                selectVerseByNumber(location.hash.substr(1), false);
+            }
         }
     });
 
@@ -110,11 +123,14 @@
     }
 
     function loadChapter(bookEncodedName = 'rdz', chapterNumber = 1) {
+        if (chapter.dataset.bookEncodedName === bookEncodedName && chapter.dataset.chapterNumber === chapterNumber) {
+            return Promise.resolve();
+        }
         return fetch('/' + bookEncodedName + '/' + chapterNumber + '?noLayout=true')
             .then(data => data.text())
             .then(chapter => {
                 document.querySelector('.chapter-container').innerHTML = chapter;
-                versesContainer = document.querySelector('.content');
+                chapter = document.querySelector('.chapter');
             });
     }
 
@@ -136,7 +152,7 @@
         }
     }, true);
 
-    versesContainer.addEventListener('click', function (event) {
+    chapterContainer.addEventListener('click', function (event) {
         var hasVerseClass = event.target.classList.contains('verse');
         var hasVerseTextClass = event.target.classList.contains('verse-text');
         
@@ -151,7 +167,12 @@
 
             container.__lastClick = Date.now();
             event.preventDefault();
-            location.hash = container.dataset.verseNumber;
+            history.pushState({
+                bookName: chapter.dataset.bookName,
+                encodedName: chapter.dataset.encodedBookName,
+                chapterNumber: chapter.dataset.chapterNumber,
+                selectedVerse: container.dataset.verseNumber
+            }, '', '/' + chapter.dataset.encodedBookName + '/' + chapter.dataset.chapterNumber + '#' + container.dataset.verseNumber);
             selectVerse(container);
         }
     }, true);
@@ -166,5 +187,15 @@
         textArea.select();
         document.execCommand('copy');
         document.body.removeChild(textArea);
+    }
+    
+    function selectVerseByNumber(verseNumber, scroll = true) {
+        var foundVerse = chapterContainer.querySelector('[data-verse-number="' + verseNumber + '"]');
+        if (foundVerse) {
+            if (scroll) {
+                window.scrollTo(0, foundVerse.offsetTop);
+            }
+            selectVerse(foundVerse);
+        }
     }
 }());

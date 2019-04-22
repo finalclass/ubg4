@@ -51,16 +51,16 @@ body {
     font-weight: bold;
 }
 
-.content .verse {
+.chapter .verse {
     padding: 2px;
     margin: 3px 0;
 }
 
-.content .verse-text {
+.chapter .verse-text {
     display: inline
 }
 
-.content .verse .interlinear-link {
+.chapter .verse .interlinear-link {
     display: inline-block;
     width: 12px;
     height: 12px;
@@ -70,7 +70,7 @@ body {
     font-weight: bold;
 }
 
-.content .verse.active {
+.chapter .verse.active {
     background-color: #fffc8566;
     border-radius: 5px;
 }

@@ -1,7 +1,8 @@
-<div class="content"
+<div class="chapter"
      data-book-name="{{ chapter.book_name }}"
      data-encoded-book-name="{{ chapter.encoded_book_name }}"
      data-nt-index="{{ chapter.book_nt_index }}"
+     data-ot-name="{{ chapter.book_ot_name }}"
      data-chapter-number="{{ chapter.number }}"
      >
   <h3>{{ chapter.book_name }}, rozdział {{ chapter.number }}</h3>
