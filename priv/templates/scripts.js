@@ -2,7 +2,6 @@
     var booksContainer = document.querySelector('.books');
     var chaptersMenu = document.querySelector('.chapters-menu');
     var chaptersContainer = document.querySelector('.chapters');
-    var chapter = document.querySelector('.chapter');
     var chapterContainer = document.querySelector('.chapter-container');
 
     function showBooksUI() {
@@ -27,12 +26,13 @@
         });
 
         verseNode.classList.add('active');
-        
+
         var interlinearLink = document.createElement('a');
         interlinearLink.setAttribute('target', '_blank');
         interlinearLink.className = 'interlinear-link';
         interlinearLink.setAttribute('title', 'Otwórz w Biblii Interlinearnej');
-        
+
+        var chapter = getCurrentChapter();
         var chapterNumber = chapter.dataset.chapterNumber;
         var verseNumber = verseNode.dataset.verseNumber;
 
@@ -86,14 +86,14 @@
         } else {
             showBooksUI();
         }
-        
+
         loadChapter(loc.encodedName, loc.chapterNumber, function () {
             if (loc.verse) {
                 selectVerseByNumber(loc.verse, false);
             }
         });
     }
-    
+
     window.addEventListener('popstate', initFromLocation);
 
     initFromLocation();
@@ -102,7 +102,7 @@
         var link = booksContainer.querySelector('a[data-encoded-name="' + encodedName + '"]');
         var bookName = link.getAttribute('title') || '';
         var nofChapters = parseInt(link.dataset.nofChapters, 10);
-        
+
         chaptersMenu.querySelector('.book-name').innerText = bookName;
 
         while (chaptersContainer.hasChildNodes()) {
@@ -121,7 +121,12 @@
         showChaptersUI();
     }
 
+    function getCurrentChapter() {
+        return document.querySelector('.chapter');
+    }
+
     function loadChapter(bookEncodedName, chapterNumber, callback) {
+        var chapter = getCurrentChapter();
         var currentEncodedBookName = chapter.dataset.encodedBookName;
         var currentChapterNumber = parseInt(chapter.dataset.chapterNumber, 10);
         if (currentEncodedBookName === bookEncodedName && currentChapterNumber === chapterNumber) {
@@ -134,7 +139,6 @@
         req.addEventListener('load', function () {
             var chapter = req.responseText;
             document.querySelector('.chapter-container').innerHTML = chapter;
-            chapter = document.querySelector('.chapter');
             if (callback) {
                 callback();
             }
@@ -161,10 +165,10 @@
     chapterContainer.addEventListener('click', function (event) {
         var hasVerseClass = event.target.classList.contains('verse');
         var hasVerseTextClass = event.target.classList.contains('verse-text');
-        
+
         if (hasVerseClass || hasVerseTextClass) {
             var container = hasVerseTextClass ? event.target.parentNode : event.target;
-            
+
             if (Date.now() - (container.__lastClick || 0) < 500) {
                 var verseText = container.querySelector('.verse-text').textContent.trim();
                 copyToClipboard(verseText);
@@ -190,7 +194,7 @@
         document.execCommand('copy');
         document.body.removeChild(textArea);
     }
-    
+
     function selectVerseByNumber(verseNumber, scroll = true) {
         var foundVerse = chapterContainer.querySelector('[data-verse-number="' + verseNumber + '"]');
         if (foundVerse) {
