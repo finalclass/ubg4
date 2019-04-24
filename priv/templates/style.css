@@ -60,16 +60,6 @@ body {
     display: inline
 }
 
-.chapter .verse .interlinear-link {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    user-select: none;
-    text-decoration: none;
-    color: #ddddff;
-    font-weight: bold;
-}
-
 .chapter .verse.active {
     background-color: #fffc8566;
     border-radius: 5px;
