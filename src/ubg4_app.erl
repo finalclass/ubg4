@@ -22,6 +22,7 @@ start(_Type, _Args) ->
     ubg4_data:read_bible(?PRIVDIR ++ "/pubg-utf8.xml"),
 
     Routes = [
+              {"/projector", ubp4_projector_handler, [{}]},
               {"/", ubg4_handler, [{}]},
               {"/:book/:chapter", ubg4_handler, [{}]},
               {"/[...]", ubg4_not_found_handler, [{}]}
