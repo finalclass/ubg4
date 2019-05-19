@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8"/>
-    <title>Uwspółcześniona Biblia Gdańska</title>
+    <title>{{ chapter.book_short_name }} {{ chapter.number }} </title>
     <style>
       {% include "style.css" %}
     </style>
@@ -38,6 +38,7 @@
     <div class="chapter-container">
       <div class="chapter"
            data-book-name="{{ chapter.book_name }}"
+           data-book-short-name="{{ chapter.book_short_name }}"
            data-encoded-book-name="{{ chapter.encoded_book_name }}"
            data-nt-index="{{ chapter.book_nt_index }}"
            data-ot-name="{{ chapter.book_ot_name }}"

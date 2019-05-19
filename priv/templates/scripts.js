@@ -54,6 +54,7 @@
             );
         }
 
+        document.title = chapter.dataset.bookShortName + ' ' + chapter.dataset.chapterNumber + ':' + verseNumber;
         verseNode.appendChild(interlinearLink);
     }
 
@@ -108,6 +109,8 @@
                 verse.removeChild(a);
             }
         });
+        var chapter = getCurrentChapter();
+        document.title = chapter.dataset.bookShortName + ' ' + chapter.dataset.chapterNumber;
     }
 
     function selectVerseByNumber(verseNumber, scroll) {

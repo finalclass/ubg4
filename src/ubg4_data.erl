@@ -138,6 +138,7 @@ get_chapters(BookNode) ->
                 book_nt_index => get_bin_attribute("nti", BookNode),
                 book_ot_name => get_bin_attribute("otn", BookNode),
                 book_name => get_bin_attribute("n", BookNode),
+                book_short_name => get_bin_attribute("s", BookNode),
                 book_nof_chapters => NofChapters,
                 book_chapters_numbers => lists:seq(1, NofChapters), 
                 encoded_book_name => get_bin_attribute("u", BookNode),
