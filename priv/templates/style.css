@@ -21,22 +21,24 @@ body {
 
 .chapters-nav {
     width: 100%;
-    display: flex;
     margin: 20px 0;
 }
 
 .chapters-nav a {
-    flex: 1;
-    text-align: center;
     text-decoration: none;
-    color: #00aa00;
+    color: #00aa00;    
 }
 
-.chapters-nav a:first-child {
+.chapters-nav td {
+    text-align: center;
+    width: 33%;
+}
+
+.chapters-nav td:first-child {
     text-align: left;
 }
 
-.chapters-nav a:last-child {
+.chapters-nav td:last-child {
     text-align: right;
 }
 

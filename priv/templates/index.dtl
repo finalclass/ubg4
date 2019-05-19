@@ -43,33 +43,41 @@
            data-ot-name="{{ chapter.book_ot_name }}"
            data-chapter-number="{{ chapter.number }}">
 
-        <div class="chapters-nav">
-          <a href="/{{ chapter.encoded_book_name }}/{{ prevChapterNumber }}"
-             class="prev-chapter">
-            {% if prevChapterNumber %}
-              &laquo; rozdział {{ prevChapterNumber }}
-            {% endif %}
-          </a>
-          
-          {% if showChapters %}
-            <a href="/{{ chapter.encoded_book_name }}/{{ chapter.number }}"
-               class="show-chapters">
-              księgi
-            </a>
-          {% elif nofChapters > 1 %}
-            <a href="/{{ chapter.encoded_book_name }}/{{ chapter.number }}?chapters"
-               class="show-chapters">
-              rozdziały
-            </a>
-          {% endif %}
-          
-          <a href="/{{ chapter.encoded_book_name }}/{{ nextChapterNumber }}"
-             class="next-chapter">
-            {% if nextChapterNumber %}
-              rozdział {{ nextChapterNumber }} &raquo;
-            {% endif %}
-          </a>
-        </div>
+        <table class="chapters-nav">
+          <tr>
+            <td>
+              {% if prevChapterNumber %}
+                <a href="/{{ chapter.encoded_book_name }}/{{ prevChapterNumber }}"
+                   class="prev-chapter">
+                  &laquo; rozdział {{ prevChapterNumber }}
+                </a>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if showChapters %}
+                <a href="/{{ chapter.encoded_book_name }}/{{ chapter.number }}"
+                   class="show-chapters">
+                  księgi
+                </a>
+              {% elif nofChapters > 1 %}
+                <a href="/{{ chapter.encoded_book_name }}/{{ chapter.number }}?chapters"
+                   class="show-chapters">
+                  rozdziały
+                </a>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if nextChapterNumber %}
+                <a href="/{{ chapter.encoded_book_name }}/{{ nextChapterNumber }}"
+                   class="next-chapter">
+                  rozdział {{ nextChapterNumber }} &raquo;
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        </table>
         
         <h3>{{ chapter.book_name }}, rozdział {{ chapter.number }}</h3>
         {% for verse in chapter.verses %}
