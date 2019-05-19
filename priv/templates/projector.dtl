@@ -3,8 +3,41 @@
   <head>
     <meta charset="UTF-8"/>
     <title>Projektor UBG</title>
+    <style>
+     .hidden {
+         display: none;
+     }
+    </style>
   </head>
-  <body>
-    PROJECTOR
+  <body data-proj-id="{{ projId }}">
+    <a href="/?proj_id={{ projId }}" target="_blank" class="start-button">
+      Otwórz kontroler i rozpocznij
+    </a>
+    <div class="container">
+      
+    </div>
+    <script>
+     var projId = document.body.dataset.projId;
+     var startButton = document.querySelector('.start-button');
+     var container = document.querySelector('.container');
+     
+     startButton.addEventListener('click', function () {
+         startButton.classList.add('hidden');
+         console.log('CLICK');
+         pollingLoop();
+     });
+
+     function pollingLoop() {
+         fetch('/projector?proj_id=' + projId)
+             .then(result => result.text())
+             .then(text => {
+                 container.innerHTML = text;
+                 setTimeout(pollingLoop, 1000);
+             })
+             .catch(err => {
+                 setTimeout(pollingLoop, 1000);
+             });
+     }
+    </script>
   </body>
 </html>

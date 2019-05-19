@@ -12,7 +12,7 @@ build() ->
     build_module(ubg4_app),
     build_module(ubg4_data),
     build_module(ubg4_handler),
-    build_module(ubp4_projector_handler),
+    build_module(ubg4_projector_handler),
     build_module(ubg4_not_found_handler),
     build_module(ubg4_sup).
     
