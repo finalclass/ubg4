@@ -121,6 +121,7 @@ get_books_from_xml(BibleXml) ->
 
 get_chapters(BookNode) ->
     ChapterNodes = xmerl_xpath:string("c", BookNode),
+    NofChapters = length(ChapterNodes),
     lists:map(
       fun(ChapterNode) ->
               VNodes = xmerl_xpath:string("v", ChapterNode),
@@ -137,8 +138,10 @@ get_chapters(BookNode) ->
                 book_nt_index => get_bin_attribute("nti", BookNode),
                 book_ot_name => get_bin_attribute("otn", BookNode),
                 book_name => get_bin_attribute("n", BookNode),
+                book_nof_chapters => NofChapters,
+                book_chapters_numbers => lists:seq(1, NofChapters), 
                 encoded_book_name => get_bin_attribute("u", BookNode),
-                number => get_bin_attribute("n", ChapterNode),
+                number => list_to_integer(binary_to_list(get_bin_attribute("n", ChapterNode))),
                 verses => Verses
                }
       end, 

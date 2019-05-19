@@ -19,8 +19,28 @@ body {
     display: block;
 }
 
+.chapters-nav {
+    width: 100%;
+    display: flex;
+    margin: 20px 0;
+}
+
+.chapters-nav a {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    color: #00aa00;
+}
+
+.chapters-nav a:first-child {
+    text-align: left;
+}
+
+.chapters-nav a:last-child {
+    text-align: right;
+}
+
 .chapters {
-    display: none;
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -54,6 +74,10 @@ body {
 .chapter .verse {
     padding: 2px;
     margin: 3px 0;
+    text-decoration: none;
+    color: #000;
+    display: block;
+    cursor: pointer;
 }
 
 .chapter .verse-text {
