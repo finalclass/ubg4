@@ -21,7 +21,7 @@ init(Req, State) ->
                               true -> CurrentChapter - 1;
                               false -> null
                           end,
-            NextChapterNumber = case CurrentChapter < NofChapters - 1 of
+            NextChapterNumber = case CurrentChapter < NofChapters of
                               true -> CurrentChapter + 1;
                               false -> null
                           end,
