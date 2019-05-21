@@ -1,10 +1,10 @@
-FROM alpine:3.5
+FROM alpine:3.7
 
 RUN apk add -uUv \
         erlang \
 	erlang-xmerl \
 	erlang-tools \
-	erlang-typer \
+	# erlang-typer \
 	erlang-snmp \
 	erlang-syntax-tools \
 	erlang-ssl \
@@ -15,7 +15,7 @@ RUN apk add -uUv \
 	erlang-otp-mibs \
 	erlang-reltool \
 	erlang-mnesia \
-	erlang-percept \
+	# erlang-percept \
 	erlang-parsetools \
 	erlang-orber \
 	erlang-public-key \
@@ -30,7 +30,7 @@ RUN apk add -uUv \
 	erlang-inets \
 	erlang-jinterface \
 	erlang-erts \
-	erlang-gs \
+	# erlang-gs \
 	erlang-eunit \
 	erlang-debugger \
 	erlang-costime \

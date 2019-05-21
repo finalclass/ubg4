@@ -53,14 +53,15 @@
   </head>
   <body data-proj-id="{{ projId }}">
     <aside class="instruction">
-      <h1>Projektor Biblji</h1>
+      <h1>Projektor Biblii</h1>
       <h3>Jak to działa?</h3>
       <p>Otwórz Biblię korzystając z poniższego linku:</p>
       <a href="" target="_blank" class="controller-link">
-        Otwórz kontroler i rozpocznij
+        LINK
       </a>
+      <p>(Projektor można kontrolować tylko wchodząc na Biblię z powyższego linku)</p>
       <p>Następnie jeśli w tamtej otwartej Biblii klikniesz wybrany werset to będzie on wyświetlony w tym oknie</p>
-      <p>Aby rozpocząć nasłuchiwanie wersetów, nacisnij przycisk:</p>
+      <p>Aby rozpocząć wyświetlanie wersetów, nacisnij przycisk:</p>
       <button class="start-button">
         Rozpocznij
       </button>

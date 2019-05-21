@@ -109,7 +109,7 @@ handle_info(_Info, State) ->
 
 init(_Args) ->
     io:format("Starting ~p (~p)~n", [{global, ?MODULE}, self()]),
-    {ok, #{}}.
+    {ok, #{}, 1000000}.
 
 terminate(normal, _State) ->
     ok;
