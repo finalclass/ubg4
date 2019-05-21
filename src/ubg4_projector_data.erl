@@ -15,8 +15,8 @@
 start_link() ->
     gen_server:start_link({global, ?MODULE}, ?MODULE, [], []).
 
-set_verse(ProjId, Verse) ->
-    gen_server:cast({global, ?MODULE}, {set_verse, ProjId, Verse}).
+set_verse(ProjId, VerseAddressString) ->
+    gen_server:cast({global, ?MODULE}, {set_verse, ProjId, VerseAddressString}).
 
 get_verse(ProjId) ->
     gen_server:call({global, ?MODULE}, {get_verse, ProjId}).
@@ -29,10 +29,15 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 handle_call({get_verse, ProjId}, _From, State) ->
-    {reply, ok, maps:get(ProjId, State), State}.
+    Val = case maps:find(ProjId, State) of
+              {ok, Val0} -> Val0;
+              error -> {<<"">>, 0, 0, <<"">>}
+          end,
+    {reply, Val, State}.
 
-handle_cast({set_verse, ProjId, Verse}, State) ->
-    NewState = maps:put(ProjId, Verse),
+handle_cast({set_verse, ProjId, VerseAddressString}, State) ->
+    Verse = ubg4_data:find_verse(VerseAddressString),
+    NewState = maps:put(ProjId, Verse, State),
     {noreply, NewState}.
 
 handle_info(_Info, State) ->

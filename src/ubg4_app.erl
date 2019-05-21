@@ -14,7 +14,8 @@
 %% API.
 
 start(_Type, _Args) ->
-    ubg4_sup:start_link(),
+    ubg4_data_sup:start_link(),
+    ubg4_projector_data_sup:start_link(),
 
     TemplateCompilationResult = erlydtl:compile_dir(?PRIVDIR ++ "/templates", ubg4_templates),
     ?L(TemplateCompilationResult),

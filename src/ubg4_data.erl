@@ -1,12 +1,12 @@
 -module(ubg4_data).
 -behaviour(gen_server).
 
--export([start_link/0]).
 -export([read_bible/1, read_bible/0]).
 -export([get_books/0]).
 -export([get_chapter/2]).
+-export([find_verse/1]).
 
--export([code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1, terminate/2]).
+-export([start_link/0, code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1, terminate/2]).
 
 -define(L(Msg), io:format("~b: ~p~n", [?LINE, Msg])).
 -define(PRIVDIR, code:priv_dir(ubg4)).
@@ -30,12 +30,30 @@ get_books() ->
 get_chapter(BookEncodedName, ChapterNumber) ->
     gen_server:call({global, ?MODULE}, {get_chapter, BookEncodedName, ChapterNumber}).
 
+find_verse(VerseBinString) ->
+    gen_server:call({global, ?MODULE}, {find_verse, VerseBinString}).
+
 %% ---------------------------
 %% gen_server behaviour
 %% ---------------------------
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
+
+handle_call({find_verse, VerseBinString}, _From, State) ->
+    [EncodedBookName, ChapterAndVerse] = string:split(VerseBinString, " "),
+    [ChapterBin, VerseBin] = string:split(ChapterAndVerse, ":"),
+    ChapterNum = list_to_integer(binary_to_list(ChapterBin)),
+    VerseNum = list_to_integer(binary_to_list(VerseBin)),
+    #{bible := Bible} = State,
+    #{books := Books} = Bible,
+    
+    [Book] = lists:filter(fun (Book) -> maps:get(encoded_name, Book) == EncodedBookName end, Books),
+    BookName = maps:get(short_name, Book),
+    [Chapter] = lists:filter(fun (Ch) -> maps:get(number, Ch) == ChapterNum end, maps:get(chapters, Book)),
+    [Verse] = lists:filter(fun (V) -> maps:get(number, V) == VerseNum end, maps:get(verses, Chapter)),
+    VerseText = maps:get(text, Verse),
+    {reply, {BookName, ChapterNum, VerseNum, VerseText}, State};
 
 handle_call({read_bible, Path}, _From, State) ->
     {reply, ok, maps:put(bible, read_bible_xml(Path), State)};
@@ -128,7 +146,7 @@ get_chapters(BookNode) ->
               Verses = lists:map(
                          fun(Verse) ->
                                  #{
-                                   number => get_bin_attribute("n", Verse),
+                                   number => list_to_integer(binary_to_list(get_bin_attribute("n", Verse))),
                                    text => get_text(Verse)
                                   }
                          end,

@@ -1,7 +1,7 @@
 %% Feel free to use, reuse and abuse the code in this file.
 
 %% @private
--module(ubg4_sup).
+-module(ubg4_projector_data_sup).
 -behaviour(supervisor).
 
 %% API.
@@ -24,12 +24,12 @@ init([]) ->
     Type = worker,
 
     TaskStrategy = {
-                    ubg4_data_id,
-                    {ubg4_data, start_link, []},
+                    ubg4_projector_data_id,
+                    {ubg4_projector_data, start_link, []},
                     Restart,
                     Shutdown,
                     Type,
-                    [ubg4_data]
+                    [ubg4_projector_data]
                    },
 
     {ok, {{one_for_one, 10, 10}, [TaskStrategy]}}.

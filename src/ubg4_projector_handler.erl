@@ -14,10 +14,14 @@ init(Req, State) ->
     case cowboy_req:method(Req) of
         <<"POST">> ->
             case cowboy_req:header(<<"content-type">>, Req) of
-                "text/plain" ->
+                <<"text/plain">> ->
                     %% read body and set the verse. Return the verse 
-                    Body = read_body(Req, <<"">>),
-                    ?L(Body);
+                    {_, Body, _} = read_body(Req, <<"">>),
+                    [ProjId, VerseAddressString] = string:split(Body, ";"),
+                    ubg4_projector_data:set_verse(ProjId, VerseAddressString),
+                    ReqWithReply = cowboy_req:reply(200, #{<<"content-type">> => <<"text/plain">>},
+                                                    <<"ok">>, Req),
+                    {ok, ReqWithReply, State};
                 _ -> ubg4_not_found_handler:init(Req, State)
             end;
         <<"GET">> ->
@@ -31,9 +35,11 @@ init(Req, State) ->
                                                     ResponseBody, Req),
                     {ok, ReqWithReply, State};
                 ProjId ->
-                    Verse = ubg4_projector_data:get_verse(ProjId),
+                    {BookName, ChapterNum, VerseNum, VerseText} = ubg4_projector_data:get_verse(ProjId),
+                    ?L({BookName, ChapterNum, VerseNum, VerseText}),
+                    ResponseBody = lists:flatten(io_lib:format("~s;~p;~p;~s", [[BookName], ChapterNum, VerseNum, [VerseText]])),
                     ReqWithReply2 = cowboy_req:reply(200, #{<<"content-type">> => <<"text/plain">>},
-                                                     Verse, Req),
+                                                     ResponseBody, Req),
                     {ok, ReqWithReply2, State}
             end;
         _ -> ubg4_not_found_handler:init(Req, State)

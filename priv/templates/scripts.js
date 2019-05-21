@@ -3,7 +3,12 @@
     var chaptersMenu = document.querySelector('.chapters-menu');
     var chaptersContainer = document.querySelector('.chapters');
     var chapterContainer = document.querySelector('.chapter-container');
+    var projId;
 
+    if (location.search.indexOf('?proj_id') !== -1) {
+        projId = location.search.split('=')[1];
+    }
+    
     window.addEventListener('popstate', function () {
         initSelectedVerse();
     });
@@ -56,6 +61,17 @@
 
         document.title = chapter.dataset.bookShortName + ' ' + chapter.dataset.chapterNumber + ':' + verseNumber;
         verseNode.appendChild(interlinearLink);
+
+        if (projId) {
+            fetch('/projector', {
+                method: 'POST',
+                headers: { 'content-type': 'text/plain' },
+                body: projId + ';'
+                    + chapter.dataset.encodedBookName + ' '
+                    + chapter.dataset.chapterNumber + ':'
+                    + verseNumber  
+            });
+        }
     }
 
     var flashMessageContainer = document.querySelector('.flash-message span');
