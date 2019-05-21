@@ -36,7 +36,6 @@ init(Req, State) ->
                     {ok, ReqWithReply, State};
                 ProjId ->
                     {BookName, ChapterNum, VerseNum, VerseText} = ubg4_projector_data:get_verse(ProjId),
-                    ?L({BookName, ChapterNum, VerseNum, VerseText}),
                     ResponseBody = lists:flatten(io_lib:format("~s;~p;~p;~s", [[BookName], ChapterNum, VerseNum, [VerseText]])),
                     ReqWithReply2 = cowboy_req:reply(200, #{<<"content-type">> => <<"text/plain">>},
                                                      ResponseBody, Req),

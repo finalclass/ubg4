@@ -7,7 +7,10 @@
 
     if (location.search.indexOf('?proj_id') !== -1) {
         projId = location.search.split('=')[1];
+        sessionStorage.setItem('projId', projId);
     }
+
+    projId = sessionStorage.getItem('projId');
     
     window.addEventListener('popstate', function () {
         initSelectedVerse();
@@ -18,7 +21,11 @@
     function initSelectedVerse(scroll) {
         deselectVerse();
         var verse = parseInt((location.hash || '').substr(1), 10);
-        selectVerseByNumber(verse, scroll);
+        if (verse) {
+            selectVerseByNumber(verse, scroll);
+        } else {
+            setProjectorVerse('-', 0, 0);
+        }
     }
 
     function getCurrentChapter() {
@@ -63,17 +70,25 @@
         verseNode.appendChild(interlinearLink);
 
         if (projId) {
-            fetch('/projector', {
-                method: 'POST',
-                headers: { 'content-type': 'text/plain' },
-                body: projId + ';'
-                    + chapter.dataset.encodedBookName + ' '
-                    + chapter.dataset.chapterNumber + ':'
-                    + verseNumber  
-            });
+            setProjectorVerse(
+                chapter.dataset.encodedBookName,
+                chapter.dataset.chapterNumber,
+                verseNumber
+            );
         }
     }
 
+    function setProjectorVerse(encodedBookName, chapterNumber, verseNumber) {
+        fetch('/projector', {
+            method: 'POST',
+            headers: { 'content-type': 'text/plain' },
+            body: projId + ';'
+                + encodedBookName + ' '
+                + chapterNumber + ':'
+                + verseNumber
+        });
+    }
+    
     var flashMessageContainer = document.querySelector('.flash-message span');
     var hideFlashMessageTimeout;
     function showFlashMessage(msg) {
@@ -100,7 +115,13 @@
             }
 
             container.__lastClick = Date.now();
-            location.hash = container.dataset.verseNumber;
+            if (container.classList.contains('active')) {
+                history.pushState(null, null, '#');
+                deselectVerse();
+                setProjectorVerse("-", 0, 0);
+            } else {
+                location.hash = container.dataset.verseNumber;
+            }
             event.preventDefault();
         }
     }, true);

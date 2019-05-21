@@ -26,7 +26,7 @@ read_bible() ->
 
 get_books() ->
     gen_server:call({global, ?MODULE}, {get_books}).
-    
+
 get_chapter(BookEncodedName, ChapterNumber) ->
     gen_server:call({global, ?MODULE}, {get_chapter, BookEncodedName, ChapterNumber}).
 
@@ -47,13 +47,22 @@ handle_call({find_verse, VerseBinString}, _From, State) ->
     VerseNum = list_to_integer(binary_to_list(VerseBin)),
     #{bible := Bible} = State,
     #{books := Books} = Bible,
-    
-    [Book] = lists:filter(fun (Book) -> maps:get(encoded_name, Book) == EncodedBookName end, Books),
-    BookName = maps:get(short_name, Book),
-    [Chapter] = lists:filter(fun (Ch) -> maps:get(number, Ch) == ChapterNum end, maps:get(chapters, Book)),
-    [Verse] = lists:filter(fun (V) -> maps:get(number, V) == VerseNum end, maps:get(verses, Chapter)),
-    VerseText = maps:get(text, Verse),
-    {reply, {BookName, ChapterNum, VerseNum, VerseText}, State};
+
+    case lists:filter(fun (Book) -> maps:get(encoded_name, Book) == EncodedBookName end, Books) of
+        [] -> {reply, {EncodedBookName, 0, 0, <<"">>}, State};
+        [Book|_]->
+            BookName = maps:get(short_name, Book),
+            case lists:filter(fun (Ch) -> maps:get(number, Ch) == ChapterNum end, maps:get(chapters, Book)) of
+                [] -> {reply, {EncodedBookName, 0, 0, <<"">>}, State};
+                [Chapter|_] ->
+                    case lists:filter(fun (V) -> maps:get(number, V) == VerseNum end, maps:get(verses, Chapter)) of
+                        [] -> {reply, {EncodedBookName, 0, 0, <<"">>}, State};
+                        [Verse|_] ->
+                            VerseText = maps:get(text, Verse),
+                            {reply, {BookName, ChapterNum, VerseNum, VerseText}, State}
+                        end
+            end
+    end;
 
 handle_call({read_bible, Path}, _From, State) ->
     {reply, ok, maps:put(bible, read_bible_xml(Path), State)};
@@ -75,9 +84,9 @@ handle_call({get_chapter, BookEncodedName, ChapterNumberBin}, _From, State) ->
     #{bible := Bible} = State,
     FindBookResult = lists:filter(fun(B) -> maps:get(encoded_name, B) == BookEncodedName end, maps:get(books, Bible)),
     case FindBookResult of
-        [] -> 
+        [] ->
             {reply, {error, book_not_found}, State};
-        [Book|_] -> 
+        [Book|_] ->
             try list_to_integer(binary_to_list(ChapterNumberBin)) of
                 ChapterNumber ->
                     Chapters = maps:get(chapters, Book),
@@ -86,7 +95,7 @@ handle_call({get_chapter, BookEncodedName, ChapterNumberBin}, _From, State) ->
                         false ->
                             Chapter = lists:nth(ChapterNumber, Chapters),
                             {reply, Chapter, State}
-                    end 
+                    end
             catch
                 _:_ -> {reply, {error, invalid_chapter_number}, State}
             end
@@ -115,7 +124,7 @@ terminate(Reason, _State) ->
 read_bible_xml(Path) ->
     Xml = erlang:element(1, xmerl_scan:file(Path)),
     Books = get_books_from_xml(Xml),
-    
+
     #{
       xml => Xml,
       books => Books
@@ -126,7 +135,7 @@ get_books_from_xml(BibleXml) ->
     lists:map(
       fun(BookNode) ->
               Chapters = get_chapters(BookNode),
-              
+
               #{
                 full_name => get_bin_attribute("n", BookNode),
                 short_name => get_bin_attribute("s", BookNode),
@@ -158,13 +167,13 @@ get_chapters(BookNode) ->
                 book_name => get_bin_attribute("n", BookNode),
                 book_short_name => get_bin_attribute("s", BookNode),
                 book_nof_chapters => NofChapters,
-                book_chapters_numbers => lists:seq(1, NofChapters), 
+                book_chapters_numbers => lists:seq(1, NofChapters),
                 encoded_book_name => get_bin_attribute("u", BookNode),
                 number => list_to_integer(binary_to_list(get_bin_attribute("n", ChapterNode))),
                 verses => Verses
                }
-      end, 
-      ChapterNodes).    
+      end,
+      ChapterNodes).
 
 %% PRIV
 

@@ -4,26 +4,96 @@
     <meta charset="UTF-8"/>
     <title>Projektor UBG</title>
     <style>
+     html,
+     body {
+         font-family: Tahoma, sans-serif;
+         height: 100%;
+         margin: 0;
+         padding: 0
+     }
      .hidden {
          display: none;
+     }
+     .instruction {
+         overflow: hidden;
+         padding: 0 20px;
+     }
+     .container {
+         padding: 20px;
+         display: flex;
+         line-height: 2em;
+         flex-direction: column;
+         align-items: center;
+         justify-content: center;
+         height: 100%;
+         box-sizing: border-box;
+     }
+     .container.hidden {
+         display: none;
+     }
+     .container p {
+         margin: 0;
+         paddin: 0;
+     }
+     .verse {
+         text-align: center;
+         line-height: 2em;
+     }
+     .verse-address {
+         text-align: center;
+         font-style: italic;
+     }
+     .book-name:after {
+         content: ' ';
+     }
+     .chapter-number:after {
+         content: ':'
      }
     </style>
   </head>
   <body data-proj-id="{{ projId }}">
-    <a href="/?proj_id={{ projId }}" target="_blank" class="start-button">
-      Otwórz kontroler i rozpocznij
-    </a>
-    <div class="container">
-      
+    <aside class="instruction">
+      <h1>Projektor Biblji</h1>
+      <h3>Jak to działa?</h3>
+      <p>Otwórz Biblię korzystając z poniższego linku:</p>
+      <a href="" target="_blank" class="controller-link">
+        Otwórz kontroler i rozpocznij
+      </a>
+      <p>Następnie jeśli w tamtej otwartej Biblii klikniesz wybrany werset to będzie on wyświetlony w tym oknie</p>
+      <p>Aby rozpocząć nasłuchiwanie wersetów, nacisnij przycisk:</p>
+      <button class="start-button">
+        Rozpocznij
+      </button>
+      <p>Id projektora: <span class="projector-id"></span></p>
+    </aside>
+
+    <div class="container hidden">
+      <p class="verse"></p>
+      <p class="verse-address">
+        <span class="book-name"></span><span class="chapter-number"></span><span class="verse-number"></span>
+      </p>
     </div>
     <script>
-     var projId = document.body.dataset.projId;
-     var startButton = document.querySelector('.start-button');
-     var container = document.querySelector('.container');
+     var projId = sessionStorage.getItem('projId') || document.body.dataset.projId;
+     var $startButton = document.querySelector('.start-button');
+     var $instruction = document.querySelector('.instruction');
+     var $verse = document.querySelector('.verse');
+     var $bookName = document.querySelector('.book-name');
+     var $chapterNumber = document.querySelector('.chapter-number');
+     var $verseNumber = document.querySelector('.verse-number');
+     var $projectorId = document.querySelector('.projector-id');
+     var $controllerLink = document.querySelector('.controller-link');
+     var $container = document.querySelector('.container');
      
-     startButton.addEventListener('click', function () {
-         startButton.classList.add('hidden');
-         console.log('CLICK');
+     $projectorId.innerText = projId;
+     sessionStorage.setItem('projId', projId);
+     var controllerUrl = location.protocol + '//' + location.host + '/?proj_id=' + projId;
+     $controllerLink.setAttribute('href', controllerUrl);
+     $controllerLink.innerText = controllerUrl;
+     
+     $startButton.addEventListener('click', function () {
+         $instruction.classList.add('hidden');
+         $container.classList.remove('hidden');
          pollingLoop();
      });
 
@@ -31,7 +101,17 @@
          fetch('/projector?proj_id=' + projId)
              .then(result => result.text())
              .then(text => {
-                 container.innerHTML = text;
+                 var split = text.split(';');
+                 var verseText = split.slice(3).join(';');
+                 if (verseText.length === 0) {
+                     $container.classList.add('hidden');
+                 } else {
+                     $container.classList.remove('hidden');
+                     $bookName.innerText = split[0]
+                     $chapterNumber.innerText = split[1];
+                     $verseNumber.innerText = split[2];
+                     $verse.innerText = verseText;
+                 }
                  setTimeout(pollingLoop, 1000);
              })
              .catch(err => {
