@@ -24,6 +24,7 @@ start(_Type, _Args) ->
 
     Routes = [
               {"/projector", ubg4_projector_handler, [{}]},
+              {"/search", ubg4_search_handler, [{}]},
               {"/", ubg4_handler, [{}]},
               {"/:book/:chapter", ubg4_handler, [{}]},
               {"/[...]", ubg4_not_found_handler, [{}]}

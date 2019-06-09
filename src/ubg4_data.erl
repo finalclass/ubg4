@@ -59,7 +59,7 @@ handle_call({find_verse, VerseBinString}, _From, State) ->
                         [] -> {reply, {EncodedBookName, 0, 0, <<"">>}, State};
                         [Verse|_] ->
                             VerseText = maps:get(text, Verse),
-                            {reply, {BookName, ChapterNum, VerseNum, VerseText}, State}
+                            {reply, {EncodedBookName, ChapterNum, VerseNum, VerseText}, State}
                         end
             end
     end;

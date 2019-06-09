@@ -14,6 +14,7 @@ build() ->
     build_module(ubg4_data),
     build_module(ubg4_handler),
     build_module(ubg4_projector_handler),
+    build_module(ubg4_search_handler),
     build_module(ubg4_not_found_handler),
     build_module(ubg4_data_sup),
     build_module(ubg4_projector_data_sup).

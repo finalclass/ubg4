@@ -18,6 +18,25 @@
 
     initSelectedVerse(true);
 
+    let fKeyCount = 0;
+    let fKeyCountTimeout;
+    window.addEventListener('keypress', function (event) {
+        if (event.key === 'f' || event.key === 'F') {
+            clearTimeout(fKeyCount);
+            fKeyCount += 1;
+            if (fKeyCount === 3) {
+                fKeyCount = 0;
+                window.location.href = '/search';
+            } else {
+                fKeyCountTimeout = setTimeout(function () {
+                    fKeyCount = 0;
+                }, 300);
+            }
+        } else {
+            fKeyCount = 0;
+        }
+    }); 
+
     function initSelectedVerse(scroll) {
         deselectVerse();
         var verse = parseInt((location.hash || '').substr(1), 10);
