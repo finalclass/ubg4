@@ -5,6 +5,7 @@
 -export([get_books/0]).
 -export([get_chapter/2]).
 -export([find_verse/1]).
+-export([get_verse/3]).
 
 -export([start_link/0, code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1, terminate/2]).
 
@@ -33,6 +34,9 @@ get_chapter(BookEncodedName, ChapterNumber) ->
 find_verse(VerseBinString) ->
     gen_server:call({global, ?MODULE}, {find_verse, VerseBinString}).
 
+get_verse(EncodedBookName, ChapterNum, VerseNum) ->
+    gen_server:call({global, ?MODULE}, {get_verse, EncodedBookName, ChapterNum, VerseNum}).
+
 %% ---------------------------
 %% gen_server behaviour
 %% ---------------------------
@@ -46,23 +50,13 @@ handle_call({find_verse, VerseBinString}, _From, State) ->
     ChapterNum = list_to_integer(binary_to_list(ChapterBin)),
     VerseNum = list_to_integer(binary_to_list(VerseBin)),
     #{bible := Bible} = State,
-    #{books := Books} = Bible,
+    Result = get_verse(Bible, EncodedBookName, ChapterNum, VerseNum),
+    {reply, Result, State};
 
-    case lists:filter(fun (Book) -> maps:get(encoded_name, Book) == EncodedBookName end, Books) of
-        [] -> {reply, {EncodedBookName, 0, 0, <<"">>}, State};
-        [Book|_]->
-            BookName = maps:get(short_name, Book),
-            case lists:filter(fun (Ch) -> maps:get(number, Ch) == ChapterNum end, maps:get(chapters, Book)) of
-                [] -> {reply, {EncodedBookName, 0, 0, <<"">>}, State};
-                [Chapter|_] ->
-                    case lists:filter(fun (V) -> maps:get(number, V) == VerseNum end, maps:get(verses, Chapter)) of
-                        [] -> {reply, {EncodedBookName, 0, 0, <<"">>}, State};
-                        [Verse|_] ->
-                            VerseText = maps:get(text, Verse),
-                            {reply, {BookName, ChapterNum, VerseNum, VerseText}, State}
-                        end
-            end
-    end;
+handle_call({get_verse, EncodedBookName, ChapterNum, VerseNum}, _From, State) ->
+    #{bible := Bible} = State,
+    Result = get_verse(Bible, EncodedBookName, ChapterNum, VerseNum),
+    {reply, Result, State};
 
 handle_call({read_bible, Path}, _From, State) ->
     {reply, ok, maps:put(bible, read_bible_xml(Path), State)};
@@ -120,6 +114,26 @@ terminate(Reason, _State) ->
 %% --------------------
 %% Internal
 %% -------------------
+
+get_verse(Bible, EncodedBookName, ChapterNum, VerseNum) ->
+    #{books := Books} = Bible,
+    ?L({EncodedBookName, ChapterNum, VerseNum}), 
+
+    case lists:filter(fun (Book) -> maps:get(encoded_name, Book) == EncodedBookName end, Books) of
+        [] -> {EncodedBookName, 0, 0, <<"">>};
+        [Book|_]->
+            BookName = maps:get(short_name, Book),
+            case lists:filter(fun (Ch) -> maps:get(number, Ch) == ChapterNum end, maps:get(chapters, Book)) of
+                [] -> {EncodedBookName, 0, 0, <<"">>};
+                [Chapter|_] ->
+                    case lists:filter(fun (V) -> maps:get(number, V) == VerseNum end, maps:get(verses, Chapter)) of
+                        [] -> {EncodedBookName, 0, 0, <<"">>};
+                        [Verse|_] ->
+                            VerseText = maps:get(text, Verse),
+                            {BookName, ChapterNum, VerseNum, VerseText}
+                    end
+            end
+    end.
 
 read_bible_xml(Path) ->
     Xml = erlang:element(1, xmerl_scan:file(Path)),

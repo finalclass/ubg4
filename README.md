@@ -7,7 +7,7 @@ Build
 -----
 
 ```bash
-rebar3 compile
+./rebar3 compile
 ```
 
 Build a docker release

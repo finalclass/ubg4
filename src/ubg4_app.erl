@@ -26,6 +26,7 @@ start(_Type, _Args) ->
               {"/projector", ubg4_projector_handler, [{}]},
               {"/", ubg4_handler, [{}]},
               {"/:book/:chapter", ubg4_handler, [{}]},
+              {"/:book/:chapter/:verse", ubg4_verse_handler, [{}]},
               {"/[...]", ubg4_not_found_handler, [{}]}
              ],
 
