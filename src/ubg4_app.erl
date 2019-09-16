@@ -24,6 +24,7 @@ start(_Type, _Args) ->
 
     Routes = [
               {"/projector", ubg4_projector_handler, [{}]},
+              {"/random", ubg4_random_verse_handler, [{}]},
               {"/", ubg4_handler, [{}]},
               {"/:book/:chapter", ubg4_handler, [{}]},
               {"/:book/:chapter/:verse", ubg4_verse_handler, [{}]},

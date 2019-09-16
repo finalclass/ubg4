@@ -6,6 +6,7 @@
 -export([get_chapter/2]).
 -export([find_verse/1]).
 -export([get_verse/3]).
+-export([get_random_verse/0]).
 
 -export([start_link/0, code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1, terminate/2]).
 
@@ -36,6 +37,9 @@ find_verse(VerseBinString) ->
 
 get_verse(EncodedBookName, ChapterNum, VerseNum) ->
     gen_server:call({global, ?MODULE}, {get_verse, EncodedBookName, ChapterNum, VerseNum}).
+
+get_random_verse() ->
+    gen_server:call({global, ?MODULE}, {get_random_verse}).
 
 %% ---------------------------
 %% gen_server behaviour
@@ -93,7 +97,28 @@ handle_call({get_chapter, BookEncodedName, ChapterNumberBin}, _From, State) ->
             catch
                 _:_ -> {reply, {error, invalid_chapter_number}, State}
             end
-    end.
+    end;
+
+handle_call({get_random_verse}, _From, State) ->
+    #{bible := Bible} = State,
+    Books = maps:get(books, Bible),
+
+    Book = get_random_from_list(Books),
+    Chapters = maps:get(chapters, Book),
+    Chapter = get_random_from_list(Chapters),
+    Verses = maps:get(verses, Chapter),
+    Verse = get_random_from_list(Verses),
+    
+    Resp = #{
+      book => maps:get(encoded_name, Book),
+      chapter_number => maps:get(number, Chapter),
+      verse_number => maps:get(number, Verse),
+      verse_text => maps:get(text, Verse),
+      all_books => lists:map(fun (B) -> maps:get(encoded_name, B) end, Books),
+      max_chapters => length(Chapters),
+      max_verses => length(Verses)
+     },
+   {reply, Resp, State}.
 
 handle_cast(_Req, State) ->
     {noreply, State}.
@@ -114,6 +139,11 @@ terminate(Reason, _State) ->
 %% --------------------
 %% Internal
 %% -------------------
+
+get_random_from_list(List) ->
+    Max = length(List),
+    ListNum = rand:uniform(Max),
+    lists:nth(ListNum, List).
 
 get_verse(Bible, EncodedBookName, ChapterNum, VerseNum) ->
     #{books := Books} = Bible,
