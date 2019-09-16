@@ -21,12 +21,12 @@
     let fKeyCount = 0;
     let fKeyCountTimeout;
     window.addEventListener('keypress', function (event) {
-        if (event.key === 'f' || event.key === 'F') {
+        if (event.key === 'n' || event.key === 'N') {
             clearTimeout(fKeyCount);
             fKeyCount += 1;
             if (fKeyCount === 3) {
                 fKeyCount = 0;
-                window.location.href = '/search';
+                window.location.href = '/navigate';
             } else {
                 fKeyCountTimeout = setTimeout(function () {
                     fKeyCount = 0;

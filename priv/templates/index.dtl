@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8"/>
-    <title>{{ chapter.book_short_name }} {{ chapter.number }} </title>
+    <title>{{ chapter.book_short_name }} {{ chapter.number }}</title>
     <style>
       {% include "style.css" %}
     </style>
@@ -81,6 +81,7 @@
         </table>
         
         <h3>{{ chapter.book_name }}, rozdział {{ chapter.number }}</h3>
+        
         {% for verse in chapter.verses %}
           <a href="#{{ verse.number  }}"
              class="verse"
