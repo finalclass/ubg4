@@ -28,8 +28,6 @@ init(Req, State) ->
                       "\"max_verses\":", MaxVerse/binary,
                       "}">>,
     
-    %% ResponseBody = "ok",
-
     ReqWithReply = cowboy_req:reply(200, #{<<"content-type">> => <<"application/json">>},
                                     ResponseBody, Req),
     {ok, ReqWithReply, State}.

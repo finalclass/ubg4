@@ -147,7 +147,6 @@ get_random_from_list(List) ->
 
 get_verse(Bible, EncodedBookName, ChapterNum, VerseNum) ->
     #{books := Books} = Bible,
-    ?L({EncodedBookName, ChapterNum, VerseNum}), 
 
     case lists:filter(fun (Book) -> maps:get(encoded_name, Book) == EncodedBookName end, Books) of
         [] -> {EncodedBookName, 0, 0, <<"">>};
