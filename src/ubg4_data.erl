@@ -21,7 +21,7 @@ start_link() ->
     gen_server:start_link({global, ?MODULE}, ?MODULE, [], []).
 
 read_bible(Path) ->
-    gen_server:call({global, ?MODULE}, {read_bible, Path}).
+    gen_server:cast({global, ?MODULE}, {read_bible, Path}).
 
 read_bible() ->
     read_bible(?PRIVDIR ++ "/pubg-utf8.xml").
@@ -61,9 +61,6 @@ handle_call({get_verse, EncodedBookName, ChapterNum, VerseNum}, _From, State) ->
     #{bible := Bible} = State,
     Result = get_verse(Bible, EncodedBookName, ChapterNum, VerseNum),
     {reply, Result, State};
-
-handle_call({read_bible, Path}, _From, State) ->
-    {reply, ok, maps:put(bible, read_bible_xml(Path), State)};
 
 handle_call({get_books}, _From, State) ->
     #{bible := Bible} = State,
@@ -119,6 +116,9 @@ handle_call({get_random_verse}, _From, State) ->
       max_verses => length(Verses)
      },
    {reply, Resp, State}.
+
+handle_cast({read_bible, Path}, State) ->
+    {noreply, maps:put(bible, read_bible_xml(Path), State)};
 
 handle_cast(_Req, State) ->
     {noreply, State}.
