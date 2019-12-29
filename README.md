@@ -10,6 +10,12 @@ Build
 ./rebar3 compile
 ```
 
+Then to start in dev mode:
+
+```bash
+./rebar3 shell
+```
+
 Build a docker release
 -------
 
